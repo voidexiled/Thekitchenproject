@@ -23,7 +23,7 @@ insert into pedidos(noOrden, orden, mesa, fecha, hora, estado) values
 (2, "3 Tortas de trompo c/todo", 3, "04/03/2023", "03:28:54", "Preparando"),
 (3, "4 tacos de trompo c/todo", 1, "04/03/2023", "03:51:32", "Preparando"),
 (4, "1 papa asada de pastor ", 7, "04/03/2023", "04:01:43", "Preparando"),
-(5, "1 gringa c/todo \n 3 tacos de trompo c/todo", 1, "04/03/2023", "04:04:47", "Preparando"),
+(5, "1 gringa c/todo \n 3 tacos de trompo c/todo \n 3 tacos de trompo c/todo \n 3 tacos de trompo c/todo \n 3 tacos de trompo c/todo \n 3 tacos de trompo c/todo \n 3 tacos de trompo c/todo", 1, "04/03/2023", "04:04:47", "Preparando"),
 (6, "5 tacos de trompo s/cebolla", 3, "04/03/2023", "04:17:18", "Preparando")
 
 ;

@@ -2,3 +2,7 @@ __pycache__/
 .git/
 .pyc
 build/
+__pycache__
+**/__pycache__
+*/*.pyc
+*/*.pyc
