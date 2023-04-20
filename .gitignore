@@ -1,4 +1,6 @@
 __pycache__/
+VirtualEnv/
 .git/
 .pyc
 build/
+modules/__pycache__/

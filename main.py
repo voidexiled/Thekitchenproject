@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
     tableTimer = QTimer()
     currentPage = "Home"
     conn = None
-    mode = "School"
+    mode = "Home"
 
     def onSelectRow(self):
         if widgets.tableWidget.currentRow() >= 0:
@@ -69,17 +69,13 @@ class MainWindow(QMainWindow):
             button.setMinimumSize(QSize(80, 30))
             button.setMaximumSize(QSize(80, 30))
             button.setFont(font)
-            # Align the button at bottom of the label
-
-            # button.setStyleSheet()
-            button.clicked.connect(lambda: self.switchOrderState(dlg, button))
+            button.clicked.connect(lambda: self.switchOrderState(dlg))
 
             container.addWidget(button, 2, 0, alignment=Qt.AlignCenter)
             dlg.exec_()
             print(widgets.tableWidget.currentRow())
 
-    def switchOrderState(self, parent, btn):
-
+    def switchOrderState(self, parent):
         if widgets.tableWidget.currentRow() >= 0:
             self.conn = self.dbConnect()
             mycursor = self.conn.cursor()
