@@ -3,4 +3,11 @@ VirtualEnv/
 .git/
 .pyc
 build/
+<<<<<<< HEAD
 modules/__pycache__/
+=======
+__pycache__
+**/__pycache__
+*/*.pyc
+*/*.pyc
+>>>>>>> 6a6a5c301f78658f9bede00539c226ed9a7ca813
