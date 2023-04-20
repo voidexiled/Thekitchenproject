@@ -9,9 +9,9 @@ MySQL Workbench 8.0 > <br>
 # Primeros pasos
 
 Añade en MySQL Workbench el schema indicado en las configuraciones del proyecto. <br>
-<code>
 
-    def dbConnect(self):
+
+    <code>def dbConnect(self):
             try:
                 if self.mode == "Home":
                     self.conn = mysql.connector.connect(
@@ -33,6 +33,6 @@ Añade en MySQL Workbench el schema indicado en las configuraciones del proyecto
             except Exception as ex:
                 print("////////")
                 print(ex.args[0])
-                print("////////")
+                print("////////")</code>
                 
-</code>
+
