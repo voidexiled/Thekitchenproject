@@ -123,7 +123,6 @@ class MainWindow(QMainWindow):
             print("////////")
             print(ex.args[0])
             print("////////")
-            widgets.plainTextEdit.setPlainText(str(ex.args))
 
     def rememberSelected(self, data):
         sel = widgets.tableWidget.currentRow()
