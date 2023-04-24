@@ -1,4 +1,4 @@
-# 📪 Making a post
+# ✍ Haciendo un pedido
 
 ## Step 1 - Start journalling
 

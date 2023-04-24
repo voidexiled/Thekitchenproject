@@ -1,24 +1,26 @@
 # Table of contents
 
-* [👋 Welcome to A Product](README.md)
+* [🍴 The Kitchen Project](README.md)
 
 ## Overview
 
-* [💡 What we do](overview/what-we-do.md)
-* [✨ Our Features](overview/our-features.md)
+* [💡 Acerca de nosotros](overview/acerca-de-nosotros.md)
+* [✨ Nuestros productos](overview/nuestros-productos.md)
 
-## Product Guides
+## Guias del proyecto
 
-* [📪 Making a post](product-guides/making-a-post.md)
-* [📎 Understanding Projects](product-guides/understanding-projects.md)
+* [Meseros](guias-del-proyecto/meseros/README.md)
+  * [✍ Haciendo un pedido](guias-del-proyecto/meseros/haciendo-un-pedido.md)
+* [Cocineros](guias-del-proyecto/cocineros/README.md)
+  * [🍔 Actualizando estado del pedido](guias-del-proyecto/cocineros/actualizando-estado-del-pedido.md)
 
-## Fundamentals
+## Cosas fundamentales
 
-* [🛠 Getting set up](fundamentals/getting-set-up/README.md)
-  * [📝 Setting permissions](fundamentals/getting-set-up/setting-permissions.md)
-  * [🧑 Inviting Members](fundamentals/getting-set-up/inviting-members.md)
+* [🛠 Configuración](cosas-fundamentales/configuracion/README.md)
+  * [📝 Base de datos](cosas-fundamentales/configuracion/base-de-datos.md)
+  * [🧑 Instalación](cosas-fundamentales/configuracion/instalacion.md)
 
-## Use Cases
+## Como usarlo?
 
-* [🎨 For Designers](use-cases/for-designers.md)
-* [🖥 For Developers](use-cases/for-developers.md)
+* [👨💼 Para Clientes](como-usarlo/para-clientes.md)
+* [🖥 Para Desarrolladores](como-usarlo/para-desarrolladores.md)
