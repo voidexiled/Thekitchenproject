@@ -185,6 +185,10 @@ class MainWindow(QMainWindow):
         # APPLY TEXTS
         self.setWindowTitle(title)
         widgets.titleRightInfo.setText(description)
+        widgets.home.setStyleSheet(
+            "background-image: url('images/images/tkpp.png'); background-position: centered; background-repeat: no-repeat;")
+        widgets.topLogo.setStyleSheet(
+            "background-image: url('images/images/tkp2.png'); background-position: centered; background-repeat: no-repeat;")
 
         # TOGGLE MENU
         # ///////////////////////////////////////////////////////////////

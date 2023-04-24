@@ -3,7 +3,7 @@ import os
 from cx_Freeze import setup, Executable
 
 # ADD FILES
-files = ['icon.ico','themes/']
+files = ['icon.ico', 'themes/', 'images/']
 
 # TARGET
 target = Executable(
@@ -14,11 +14,11 @@ target = Executable(
 
 # SETUP CX FREEZE
 setup(
-    name = "TheKitchenProject",
-    version = "1.0",
-    description = "Description test",
-    author = "Jesus Jalomo",
-    options = {'build_exe' : {'include_files' : files}},
-    executables = [target]
-    
+    name="TheKitchenProject",
+    version="1.0",
+    description="Ing. Software Project",
+    author="Jesus Jalomo",
+    options={'build_exe': {'include_files': files}},
+    executables=[target]
+
 )
