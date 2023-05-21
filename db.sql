@@ -1,7 +1,28 @@
 CREATE DATABASE IF NOT EXISTS thekitchenproject;
 USE thekitchenproject;
 
-DROP TABLE IF EXISTS mesas, pedidos;
+DROP TABLE IF EXISTS mesas, pedidos, menu;
+
+create table menu(
+idComida int primary key auto_increment,
+nombreComida varchar(50) not null,
+precioComida numeric(6,2) not null
+);
+insert into menu(nombreComida, precioComida)
+values ("taco de pastor", 13.00),
+		("taco de cecina", 15.00),
+        ("gringa", 35.00),
+        ("torta de pastor", 45.00),
+        ("torta de cecina", 45.00),
+        ("torta mixta", 50.00),
+        ("papa asada de pastor", 65.00),
+        ("papa asada de cecina", 65.00),
+        ("papa asada mixta", 70.00),
+        ("coca cola 600ml", 28.00),
+        ("pepsi 600ml", 26.00),
+        ("sprite 600ml", 26.00),
+        ("manzanita sol 600ml", 26.00);
+        
 
 create table mesas(
 mesa int primary key

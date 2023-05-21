@@ -1192,13 +1192,12 @@ class Ui_MainWindow(object):
         self.pedidoLabel.setFixedHeight(20)
         self.meseroGridLayout.addWidget(self.pedidoLabel, 1, 0, 1, 1, Qt.AlignRight)
 
-        self.pedidoLineEdit = QTextEdit(self.new_page)
-        self.pedidoLineEdit.setObjectName("pedidoMesero")
-        self.pedidoLineEdit.setPlaceholderText("Orden")
+        self.pedidoLineEdit = QPushButton(self.new_page)
+        self.pedidoLineEdit.setObjectName("pedidoMeseroButton")
         self.pedidoLineEdit.setMinimumSize(QSize(50, 50))
         self.pedidoLineEdit.setMaximumSize(QSize(250, 100))
-        self.pedidoLineEdit.setFrameShape(QFrame.Shape.StyledPanel)
-        self.pedidoLineEdit.setAlignment(Qt.AlignLeft)
+        self.pedidoLineEdit.setStyleSheet("padding-left: 5px;\npadding-right: 5px;\n")
+        """
         self.pedidoLineEdit.setStyleSheet(
             "	background-color: rgb(33, 37, 43);\n"
             "	border-radius: 5px;\n"
@@ -1207,6 +1206,8 @@ class Ui_MainWindow(object):
             "	selection-color: rgb(255, 255, 255);\n"
             "	selection-background-color: rgb(255, 121, 198);\n"
         )
+        
+        """
         self.meseroGridLayout.addWidget(self.pedidoLineEdit, 1, 1, 1, 1, Qt.AlignLeft)
 
         self.enviarPedidoButton = QPushButton(self.new_page)
@@ -1219,6 +1220,104 @@ class Ui_MainWindow(object):
             self.enviarPedidoButton, 2, 0, 1, 2, Qt.AlignCenter
         )
 
+        """
+        ----------------------TABLE WIDGET-----------------------
+        """
+        self.tableWidget2 = QTableWidget(self.new_page)
+        if self.tableWidget2.columnCount() < 5:
+            self.tableWidget2.setColumnCount(5)
+        _qtablewidgetitem = QTableWidgetItem()
+        self.tableWidget2.setHorizontalHeaderItem(0, _qtablewidgetitem)
+        _qtablewidgetitem1 = QTableWidgetItem()
+        self.tableWidget2.setHorizontalHeaderItem(1, _qtablewidgetitem1)
+        _qtablewidgetitem2 = QTableWidgetItem()
+        self.tableWidget2.setHorizontalHeaderItem(2, _qtablewidgetitem2)
+        _qtablewidgetitem3 = QTableWidgetItem()
+        self.tableWidget2.setHorizontalHeaderItem(3, _qtablewidgetitem3)
+        if self.tableWidget2.rowCount() < 16:
+            self.tableWidget2.setRowCount(16)
+        _font4 = QFont()
+        _font4.setFamily("Segoe UI")
+        # COLUMNS
+        _qtablewidgetitem20 = QTableWidgetItem()
+        self.tableWidget2.setItem(0, 0, _qtablewidgetitem20)
+        _qtablewidgetitem21 = QTableWidgetItem()
+        self.tableWidget2.setItem(0, 1, _qtablewidgetitem21)
+        _qtablewidgetitem22 = QTableWidgetItem()
+        self.tableWidget2.setItem(0, 2, _qtablewidgetitem22)
+        _qtablewidgetitem23 = QTableWidgetItem()
+        self.tableWidget2.setItem(0, 3, _qtablewidgetitem23)
+
+        self.tableWidget2.setObjectName("tableWidget2")
+        _sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        _sizePolicy3.setHorizontalStretch(0)
+        _sizePolicy3.setVerticalStretch(0)
+        _sizePolicy3.setHeightForWidth(
+            self.tableWidget.sizePolicy().hasHeightForWidth()
+        )
+        self.tableWidget2.setSizePolicy(_sizePolicy3)
+        _palette = QPalette()
+        _brush = QBrush(QColor(221, 221, 221, 255))
+        _brush.setStyle(Qt.SolidPattern)
+        _palette.setBrush(QPalette.Active, QPalette.WindowText, _brush)
+        _brush1 = QBrush(QColor(0, 0, 0, 0))
+        _brush1.setStyle(Qt.SolidPattern)
+        _palette.setBrush(QPalette.Active, QPalette.Button, _brush1)
+        _palette.setBrush(QPalette.Active, QPalette.Text, _brush)
+        _palette.setBrush(QPalette.Active, QPalette.ButtonText, _brush)
+        _brush2 = QBrush(QColor(0, 0, 0, 255))
+        _brush2.setStyle(Qt.NoBrush)
+        _palette.setBrush(QPalette.Active, QPalette.Base, _brush2)
+        _palette.setBrush(QPalette.Active, QPalette.Window, _brush1)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        _palette.setBrush(QPalette.Active, QPalette.PlaceholderText, _brush)
+        # endif
+        _palette.setBrush(QPalette.Inactive, QPalette.WindowText, _brush)
+        _palette.setBrush(QPalette.Inactive, QPalette.Button, _brush1)
+        _palette.setBrush(QPalette.Inactive, QPalette.Text, _brush)
+        _palette.setBrush(QPalette.Inactive, QPalette.ButtonText, _brush)
+        _brush3 = QBrush(QColor(0, 0, 0, 255))
+        _brush3.setStyle(Qt.NoBrush)
+        _palette.setBrush(QPalette.Inactive, QPalette.Base, _brush3)
+        _palette.setBrush(QPalette.Inactive, QPalette.Window, _brush1)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        _palette.setBrush(QPalette.Inactive, QPalette.PlaceholderText, _brush)
+        # endif
+        _palette.setBrush(QPalette.Disabled, QPalette.WindowText, _brush)
+        _palette.setBrush(QPalette.Disabled, QPalette.Button, _brush1)
+        _palette.setBrush(QPalette.Disabled, QPalette.Text, _brush)
+        _palette.setBrush(QPalette.Disabled, QPalette.ButtonText, _brush)
+        _brush4 = QBrush(QColor(0, 0, 0, 255))
+        _brush4.setStyle(Qt.NoBrush)
+        _palette.setBrush(QPalette.Disabled, QPalette.Base, _brush4)
+        _palette.setBrush(QPalette.Disabled, QPalette.Window, _brush1)
+        # if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        _palette.setBrush(QPalette.Disabled, QPalette.PlaceholderText, _brush)
+        # endif
+        self.tableWidget2.setPalette(_palette)
+        self.tableWidget2.setFrameShape(QFrame.NoFrame)
+        self.tableWidget2.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.tableWidget2.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        self.tableWidget2.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableWidget2.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.tableWidget2.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableWidget2.setShowGrid(True)
+        self.tableWidget2.setGridStyle(Qt.SolidLine)
+        self.tableWidget2.setSortingEnabled(False)
+        self.tableWidget2.horizontalHeader().setVisible(False)
+        self.tableWidget2.horizontalHeader().setCascadingSectionResizes(True)
+        self.tableWidget2.horizontalHeader().setDefaultSectionSize(200)
+        self.tableWidget2.horizontalHeader().setStretchLastSection(True)
+        self.tableWidget2.verticalHeader().setVisible(False)
+        self.tableWidget2.verticalHeader().setCascadingSectionResizes(False)
+        self.tableWidget2.verticalHeader().setHighlightSections(False)
+        self.tableWidget2.verticalHeader().setStretchLastSection(True)
+        self.tableWidget2.setColumnCount(4)
+        self.meseroGridLayout.addWidget(self.tableWidget2, 0, 2, 3, 3, Qt.AlignCenter)
+
+        """
+        -----------------------TABLE WIDGET-----------------------
+        """
         self.stackedWidget.addWidget(self.new_page)
 
         self.verticalLayout_15.addWidget(self.stackedWidget)
@@ -1443,6 +1542,17 @@ class Ui_MainWindow(object):
         # endif // QT_CONFIG(tooltip)
         self.closeAppBtn.setText("")
 
+        _qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
+        _qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", "0", None))
+        _qtablewidgetitem1 = self.tableWidget.horizontalHeaderItem(1)
+        _qtablewidgetitem1.setText(QCoreApplication.translate("MainWindow", "1", None))
+        _qtablewidgetitem2 = self.tableWidget.horizontalHeaderItem(2)
+        _qtablewidgetitem2.setText(QCoreApplication.translate("MainWindow", "2", None))
+        _qtablewidgetitem3 = self.tableWidget.horizontalHeaderItem(3)
+        _qtablewidgetitem3.setText(QCoreApplication.translate("MainWindow", "3", None))
+        _qtablewidgetitem4 = self.tableWidget.horizontalHeaderItem(4)
+        _qtablewidgetitem4.setText(QCoreApplication.translate("MainWindow", "3", None))
+
         ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", "0", None))
         ___qtablewidgetitem1 = self.tableWidget.horizontalHeaderItem(1)
@@ -1543,11 +1653,35 @@ class Ui_MainWindow(object):
         self.pedidoLabel.setText(
             QCoreApplication.translate("MainWindow", "Pedido", None)
         )
-        self.pedidoLineEdit.setText(QCoreApplication.translate("MainWindow", "", None))
+        self.pedidoLineEdit.setText(
+            QCoreApplication.translate("MainWindow", "Escojer platillos", None)
+        )
 
         self.enviarPedidoButton.setText(
             QCoreApplication.translate("MainWindow", "Enviar", None)
         )
+
+        _sortingEnabled = self.tableWidget2.isSortingEnabled()
+        self.tableWidget.setSortingEnabled(False)
+        _qtablewidgetitem20 = self.tableWidget.item(0, 0)
+        _qtablewidgetitem20.setText(
+            QCoreApplication.translate("MainWindow", "N° Orden", None)
+        )
+        _qtablewidgetitem21 = self.tableWidget2.item(0, 1)
+
+        _qtablewidgetitem21.setText(
+            QCoreApplication.translate("MainWindow", "Orden", None)
+        )
+        _qtablewidgetitem22 = self.tableWidget2.item(0, 2)
+        _qtablewidgetitem22.setText(
+            QCoreApplication.translate("MainWindow", "Mesa", None)
+        )
+        _qtablewidgetitem23 = self.tableWidget2.item(0, 3)
+        _qtablewidgetitem23.setText(
+            QCoreApplication.translate("MainWindow", "Total", None)
+        )
+
+        self.tableWidget.setSortingEnabled(__sortingEnabled)
 
         self.btn_message.setText(
             QCoreApplication.translate("MainWindow", "Message", None)
