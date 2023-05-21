@@ -8,6 +8,7 @@ from mysql.connector.plugins import caching_sha2_password
 # ///////////////////////////////////////////////////////////////
 from modules import *
 from widgets import *
+
 # FIX Problem for High DPI and Scale above 100%
 os.environ["QT_FONT_DPI"] = "96"
 
@@ -23,30 +24,38 @@ class MainWindow(QMainWindow):
     mode = "Home"
 
     def onSelectRow(self):
+        """
+        Esta función crea un cuadro de diálogo con información sobre una fila seleccionada en una tabla
+        y un botón para cambiar el estado del pedido.
+        """
         if widgets.tableWidget.currentRow() >= 0:
             dlg = QDialog(self)
             dlg.setMinimumSize(QSize(350, 170))
             dlg.setWindowTitle(
-                f'Orden {widgets.tableWidget.item(widgets.tableWidget.currentRow(), 0).text()} // Mesa {widgets.tableWidget.item(widgets.tableWidget.currentRow(), 2).text()}')
-            dlg.setStyleSheet(u"QDialog{background-color: rgb(40, 44, 52);border: 1px solid rgb(44, 49, 58);text-color: rgb(221, 221, 221);font: 10pt \"Segoe UI\";}  \n"
-                              "QPushButton{\n"
-
-                              "verical-align: bottom; horizontal-align: center; margin-bottom: 10px; background-color: rgba(15, 15, 15, 0.9); border: 1px solid rgb(255, 121, 198); border-radius: 8px;padding: 3px 3px 3px 3px; color: rgb(255, 121, 198); font: 10pt \"Segoe UI\"\n"
-                              "}\n"
-                              "QPushButton:hover{\n"
-                              "transition-delay:1s;\n"
-                              "background-color: rgba(50, 50, 50, 0.7); border: 1px solid rgb(255, 121, 198); color: rgb(255, 121, 198)\n"
-                              "}\n"
-                              "QPushButton:pressed{\n"
-                              "transition-delay:0.3s;\n"
-                              "background-color: rgba(80, 80, 80, 0.5); border: 1px solid rgb(255, 121, 198); color: rgb(255, 121, 198)\n"
-                              "}\n"
-                              "QLabel{\n"
-                              "text-color: white;\n"
-                              "}\n"
-                              )
-            ordenes = widgets.tableWidget.item(
-                widgets.tableWidget.currentRow(), 1).text().split("\n")
+                f"Orden {widgets.tableWidget.item(widgets.tableWidget.currentRow(), 0).text()} // Mesa {widgets.tableWidget.item(widgets.tableWidget.currentRow(), 2).text()}"
+            )
+            dlg.setStyleSheet(
+                'QDialog{background-color: rgb(40, 44, 52);border: 1px solid rgb(44, 49, 58);text-color: rgb(221, 221, 221);font: 10pt "Segoe UI";}  \n'
+                "QPushButton{\n"
+                'verical-align: bottom; horizontal-align: center; margin-bottom: 10px; background-color: rgba(15, 15, 15, 0.9); border: 1px solid rgb(255, 121, 198); border-radius: 8px;padding: 3px 3px 3px 3px; color: rgb(255, 121, 198); font: 10pt "Segoe UI"\n'
+                "}\n"
+                "QPushButton:hover{\n"
+                "transition-delay:1s;\n"
+                "background-color: rgba(50, 50, 50, 0.7); border: 1px solid rgb(255, 121, 198); color: rgb(255, 121, 198)\n"
+                "}\n"
+                "QPushButton:pressed{\n"
+                "transition-delay:0.3s;\n"
+                "background-color: rgba(80, 80, 80, 0.5); border: 1px solid rgb(255, 121, 198); color: rgb(255, 121, 198)\n"
+                "}\n"
+                "QLabel{\n"
+                "text-color: white;\n"
+                "}\n"
+            )
+            ordenes = (
+                widgets.tableWidget.item(widgets.tableWidget.currentRow(), 1)
+                .text()
+                .split("\n")
+            )
             print(ordenes)
             font = QFont()
             font.setPointSize(10)
@@ -59,8 +68,9 @@ class MainWindow(QMainWindow):
 
             label = QLabel()
             label.setAlignment(Qt.AlignCenter)
-            label.setText(widgets.tableWidget.item(
-                widgets.tableWidget.currentRow(), 1).text())
+            label.setText(
+                widgets.tableWidget.item(widgets.tableWidget.currentRow(), 1).text()
+            )
             label.setStyleSheet("color: #FFFFFF")
             # put the label at 0, 0, 0, 0 in the container grid layout
             container.addWidget(label, 0, 0, alignment=Qt.AlignTop)
@@ -72,15 +82,23 @@ class MainWindow(QMainWindow):
             button.clicked.connect(lambda: self.switchOrderState(dlg))
 
             container.addWidget(button, 2, 0, alignment=Qt.AlignCenter)
-            dlg.exec_()
+            dlg.exec()
             print(widgets.tableWidget.currentRow())
 
     def switchOrderState(self, parent):
+        """
+        Esta función actualiza el estado de un pedido seleccionado a "Listo" y muestra un mensaje de
+        error si no se selecciona ningún pedido.
+
+        :param parent: El parámetro principal es una referencia al widget principal del widget actual.
+        Se utiliza para especificar el widget principal del QDialog que se crea en la función
+        """
         if widgets.tableWidget.currentRow() >= 0:
             self.conn = self.dbConnect()
             mycursor = self.conn.cursor()
             mycursor.execute(
-                f"UPDATE pedidos SET estado = 'Listo' WHERE noOrden = {widgets.tableWidget.item(widgets.tableWidget.currentRow(), 0).text()}")
+                f"UPDATE pedidos SET estado = 'Listo' WHERE noOrden = {widgets.tableWidget.item(widgets.tableWidget.currentRow(), 0).text()}"
+            )
             self.conn.commit()
             self.conn.close()
             self.tableTimer.stop()
@@ -100,19 +118,39 @@ class MainWindow(QMainWindow):
             label.setAlignment(Qt.AlignCenter)
 
     def dbConnect(self):
+        """
+        Esta función se conecta a una base de datos MySQL según el modo especificado (ya sea "Hogar" o
+        "Escuela").
+        :return: el objeto de conexión a la base de datos `self.conn`.
+        """
         try:
             if self.mode == "Home":
                 self.conn = mysql.connector.connect(
-                    host='localhost', password='EURO20partners.', user='root', database="thekitchenproject")
+                    host="localhost",
+                    password="EURO20partners.",
+                    user="root",
+                    database="thekitchenproject",
+                )
                 mysql.connector.plugins.caching_sha2_password.MySQLCachingSHA2PasswordAuthPlugin(
-                    auth_data='', username='root', password='EURO20partners.', database='thekitchenproject')
+                    auth_data="",
+                    username="root",
+                    password="EURO20partners.",
+                    database="thekitchenproject",
+                )
             if self.mode == "School":
                 self.conn = mysql.connector.connect(
-                    host='localhost', password='Z4me5cwh*', user='root', database="thekitchenproject")
+                    host="localhost",
+                    password="Z4me5cwh*",
+                    user="root",
+                    database="thekitchenproject",
+                )
                 mysql.connector.plugins.caching_sha2_password.MySQLCachingSHA2PasswordAuthPlugin(
-                    auth_data='', username='root', password='Z4me5cwh*', database='thekitchenproject')
+                    auth_data="",
+                    username="root",
+                    password="Z4me5cwh*",
+                    database="thekitchenproject",
+                )
             if self.conn.is_connected():
-
                 mycursor = self.conn.cursor()
             else:
                 # widgets.plainTextEdit.setText(
@@ -125,17 +163,33 @@ class MainWindow(QMainWindow):
             print("////////")
 
     def rememberSelected(self, data):
+        """
+        Esta función recuerda la fila seleccionada en un widget de tabla y llena la tabla con datos.
+
+        :param data: Es una variable que contiene los datos que se utilizarán para llenar el widget de
+        la tabla. Se llama a la función "fillTable" con estos datos para llenar la tabla
+        """
         sel = widgets.tableWidget.currentRow()
         self.selected = sel
         self.fillTable(data)
 
     def fillTable(self, data):
+        """
+        La función "fillTable" toma un parámetro "datos" y realiza alguna acción sobre él, pero la
+        acción específica no se muestra en el fragmento de código proporcionado.
+
+        :param data: El parámetro "datos" es probablemente una variable que contiene información que
+        debe mostrarse en formato de tabla. La función "fillTable" es probablemente un método que toma
+        estos datos y llena una tabla con ellos, ya sea creando nuevas filas en la tabla o actualizando
+        las existentes.
+        """
         print(self.currentPage)
-        if (self.currentPage == "Cocina"):
+        if self.currentPage == "Cocina":
             self.conn = self.dbConnect()
             mycursor = self.conn.cursor()
             mycursor.execute(
-                "SELECT noOrden, orden, mesa, fecha, hora FROM pedidos where estado = 'Preparando'")
+                "SELECT noOrden, orden, mesa, fecha, hora FROM pedidos where estado = 'Preparando'"
+            )
             data = mycursor.fetchall()
             print(data)
             columns = ["N° Orden", "Orden", "Mesa", "Fecha", "Hora"]
@@ -146,11 +200,10 @@ class MainWindow(QMainWindow):
                 for col in columns:
                     currCol = columns.index(col)
                     item = QTableWidgetItem()
-                    widgets.tableWidget.setItem(
-                        data.index(row)+1, currCol, item)
+                    widgets.tableWidget.setItem(data.index(row) + 1, currCol, item)
                     item.setText(str(row[currCol]))
 
-            if (widgets.tableWidget.rowCount() < 16):
+            if widgets.tableWidget.rowCount() < 16:
                 widgets.tableWidget.setRowCount(16)
             widgets.tableWidget.selectRow(self.selected)
             self.conn.close()
@@ -158,13 +211,11 @@ class MainWindow(QMainWindow):
                 self.tableTimer.stop()
             if not self.tableTimer.isActive():
                 self.tableTimer = QTimer()
-                self.tableTimer.setInterval(3000)
-                self.tableTimer.timeout.connect(
-                    lambda: self.rememberSelected(data))
+                self.tableTimer.setInterval(1200)
+                self.tableTimer.timeout.connect(lambda: self.rememberSelected(data))
                 self.tableTimer.start()
 
     def __init__(self):
-
         QMainWindow.__init__(self)
         self.selected = 0
         # SET AS GLOBAL WIDGETS
@@ -186,14 +237,15 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(title)
         widgets.titleRightInfo.setText(description)
         widgets.home.setStyleSheet(
-            "background-image: url('images/images/tkpp.png'); background-position: centered; background-repeat: no-repeat;")
+            "background-image: url('images/images/tkpp.png'); background-position: centered; background-repeat: no-repeat;"
+        )
         widgets.topLogo.setStyleSheet(
-            "background-image: url('images/images/tkp2.png'); background-position: centered; background-repeat: no-repeat;")
+            "background-image: url('images/images/tkp2.png'); background-position: centered; background-repeat: no-repeat;"
+        )
 
         # TOGGLE MENU
         # ///////////////////////////////////////////////////////////////
-        widgets.toggleButton.clicked.connect(
-            lambda: UIFunctions.toggleMenu(self, True))
+        widgets.toggleButton.clicked.connect(lambda: UIFunctions.toggleMenu(self, True))
 
         # SET UI DEFINITIONS
         # ///////////////////////////////////////////////////////////////
@@ -217,12 +269,14 @@ class MainWindow(QMainWindow):
         # EXTRA LEFT BOX
         def openCloseLeftBox():
             UIFunctions.toggleLeftBox(self, True)
+
         widgets.toggleLeftBox.clicked.connect(openCloseLeftBox)
         widgets.extraCloseColumnBtn.clicked.connect(openCloseLeftBox)
 
         # EXTRA RIGHT BOX
         def openCloseRightBox():
             UIFunctions.toggleRightBox(self, True)
+
         widgets.settingsTopBtn.clicked.connect(openCloseRightBox)
 
         # SHOW APP
@@ -246,13 +300,18 @@ class MainWindow(QMainWindow):
         # ///////////////////////////////////////////////////////////////
         widgets.stackedWidget.setCurrentWidget(widgets.home)
         widgets.btn_home.setStyleSheet(
-            UIFunctions.selectMenu(widgets.btn_home.styleSheet()))
+            UIFunctions.selectMenu(widgets.btn_home.styleSheet())
+        )
 
     # BUTTONS CLICK
 
     # ///////////////////////////////////////////////////////////////
 
     def buttonClick(self):
+        """
+        Esta función maneja los clics en los botones y cambia la página actual que se muestra en función
+        del botón en el que se hizo clic.
+        """
         # GET BUTTON CLICKED
         btn = self.sender()
         btnName = btn.objectName()
@@ -280,7 +339,7 @@ class MainWindow(QMainWindow):
             ]
             columns = ["N° Orden", "Orden", "Mesa", "Fecha", "Hora"]
             font = QFont()
-            font.setFamily(u"Segoe UI")
+            font.setFamily("Segoe UI")
             font.setPointSize(12)
             font.setBold(True)
             font.setItalic(False)
@@ -299,24 +358,21 @@ class MainWindow(QMainWindow):
                 for col in columns:
                     currCol = columns.index(col)
                     item = QTableWidgetItem()
-                    widgets.tableWidget.setItem(
-                        data.index(row)+1, currCol, item)
+                    widgets.tableWidget.setItem(data.index(row) + 1, currCol, item)
                     item.setText(row[currCol])
             if not self.tableTimer.isActive():
                 self.fillTable(data)
 
-            if (widgets.tableWidget.rowCount() < 16):
+            if widgets.tableWidget.rowCount() < 16:
                 widgets.tableWidget.setRowCount(16)
 
         # SHOW NEW PAGE
         if btnName == "btn_new":
             self.currentPage = "Historial"
-            widgets.stackedWidget.setCurrentWidget(
-                widgets.new_page)  # SET PAGE
+            widgets.stackedWidget.setCurrentWidget(widgets.new_page)  # SET PAGE
             # RESET ANOTHERS BUTTONS SELECTED
             UIFunctions.resetStyle(self, btnName)
-            btn.setStyleSheet(UIFunctions.selectMenu(
-                btn.styleSheet()))  # SELECT MENU
+            btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))  # SELECT MENU
 
         if btnName == "btn_save":
             self.currentPage = "Save"
@@ -340,19 +396,19 @@ class MainWindow(QMainWindow):
 
         # PRINT MOUSE EVENTS
         if event.buttons() == Qt.LeftButton:
-            print('Mouse click: LEFT CLICK')
+            print("Mouse click: LEFT CLICK")
         if event.buttons() == Qt.RightButton:
-            print('Mouse click: RIGHT CLICK')
+            print("Mouse click: RIGHT CLICK")
 
     # DOUBLE CLICK PRINTS WIDGET NAME
     def mouseDoubleClickEvent(self, event):
         widget = self.childAt(event.pos())
         if widget is not None and widget.objectName():
-            print('dblclick:', widget.objectName())
+            print("dblclick:", widget.objectName())
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon("icon.ico"))
     window = MainWindow()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
