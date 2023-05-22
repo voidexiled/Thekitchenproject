@@ -160,17 +160,12 @@ class MainWindow(QMainWindow):
                 )
             if self.mode == "School":
                 self.conn = mysql.connector.connect(
-                    host="localhost",
-                    password="Z4me5cwh*",
-                    user="root",
-                    database="thekitchenproject",
+                    host="us-cdbr-east-06.cleardb.net",
+                    password="d4d6ad06",
+                    user="b9744502d4cb76",
+                    database="heroku_b71305dcc13c949",
                 )
-                mysql.connector.plugins.caching_sha2_password.MySQLCachingSHA2PasswordAuthPlugin(
-                    auth_data="",
-                    username="root",
-                    password="Z4me5cwh*",
-                    database="thekitchenproject",
-                )
+
             if self.conn.is_connected():
                 mycursor = self.conn.cursor()
             else:
@@ -517,7 +512,7 @@ class MainWindow(QMainWindow):
             label.setText("El pedido ha sido enviado")
             label.move(50, 50)
             label.setAlignment(Qt.AlignCenter, Qt.AlignCenter)
-            dlg.exec_()
+            dlg.exec()
 
         self.conn.close()
 
@@ -974,7 +969,7 @@ class MainWindow(QMainWindow):
     # ///////////////////////////////////////////////////////////////
     def mousePressEvent(self, event):
         # SET DRAG POS WINDOW
-        self.dragPos = event.globalPos().toPoint()
+        self.dragPos = event.globalPos()
 
         # PRINT MOUSE EVENTS
         if event.buttons() == Qt.LeftButton:
