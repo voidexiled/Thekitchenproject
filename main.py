@@ -2,6 +2,8 @@ import sys
 import os
 import platform
 import mysql.connector
+import time
+from datetime import datetime
 from decimal import Decimal
 from mysql.connector.plugins import caching_sha2_password
 
@@ -27,72 +29,85 @@ class MainWindow(QMainWindow):
     pedidoString = ""
     numPlato = 1
     pedidos = []
+    pedidosShowTextEdit = None
+    date_time_str = None
+    total = 0.0
+
+    def closeQDialog(self):
+        os.system(cmd)
+        QtCore.QCoreApplication.instance().quit()
 
     def onSelectRow(self, table):
         """
         Esta función crea un cuadro de diálogo con información sobre una fila seleccionada en una tabla
         y un botón para cambiar el estado del pedido.
         """
-        if table.currentRow() > 0:
-            dlg = QDialog(self)
-            dlg.setMinimumSize(QSize(350, 170))
-            dlg.setWindowTitle(
-                f"Orden {table.item(table.currentRow(), 0).text()} // Mesa {table.item(table.currentRow(), 2).text()}"
-            )
-            dlg.setStyleSheet(
-                'QDialog{background-color: rgb(40, 44, 52);border: 1px solid rgb(44, 49, 58);color: rgb(221, 221, 221);font: 10pt "Segoe UI";}  \n'
-                "QPushButton {\n"
-                "	border: 2px solid rgb(52, 59, 72);\n"
-                "	border-radius: 5px;	\n"
-                "	background-color: rgb(52, 59, 72);\n"
-                "   color: rgb(255, 255, 255);\n"
-                "   padding: 5px;\n"
-                "   text-align: center;\n"
-                "   font: 12pt 'Segoe UI';\n"
-                "}\n"
-                "QPushButton:hover {\n"
-                "	background-color: rgb(57, 65, 80);\n"
-                "	border: 2px solid rgb(61, 70, 86);\n"
-                "}\n"
-                "QPushButton:pressed {	\n"
-                "	background-color: rgb(35, 40, 49);\n"
-                "	border: 2px solid rgb(43, 50, 61);\n"
-                "}\n"
-                "QLabel{\n"
-                "color: white;\n"
-                "}\n"
-            )
-            ordenes = table.item(table.currentRow(), 1).text().split("\n")
-            print(ordenes)
-            font = QFont()
-            font.setPointSize(10)
-            font.setFamily("Segoe UI")
-            container = QGridLayout(dlg)
-            container.setHorizontalSpacing(10)
-            container.setVerticalSpacing(10)
-            container.setContentsMargins(10, -1, 10, -1)
-            # Align all items inside of container to the center
+        if not table.currentRow() > 0:
+            return
 
-            label = QLabel()
-            label.setAlignment(Qt.AlignCenter)
-            label.setText(table.item(table.currentRow(), 1).text())
-            label.setStyleSheet("color: #FFFFFF")
-            # put the label at 0, 0, 0, 0 in the container grid layout
-            container.addWidget(label, 0, 0, alignment=Qt.AlignTop)
+        dlg = QDialog(self)
+        dlg.setMinimumSize(QSize(350, 170))
+        dlg.setWindowTitle(
+            f"Orden {table.item(table.currentRow(), 0).text()} // Mesa {table.item(table.currentRow(), 2).text()}"
+        )
+        dlg.setStyleSheet(
+            'QDialog{background-color: rgb(40, 44, 52);border: 1px solid rgb(44, 49, 58);color: rgb(221, 221, 221);font: 10pt "Segoe UI";}  \n'
+            "QPushButton {\n"
+            "	border: 2px solid rgb(52, 59, 72);\n"
+            "	border-radius: 5px;	\n"
+            "	background-color: rgb(52, 59, 72);\n"
+            "   color: rgb(255, 255, 255);\n"
+            "   padding: 5px;\n"
+            "   text-align: center;\n"
+            "   font: 12pt 'Segoe UI';\n"
+            "}\n"
+            "QPushButton:hover {\n"
+            "	background-color: rgb(57, 65, 80);\n"
+            "	border: 2px solid rgb(61, 70, 86);\n"
+            "}\n"
+            "QPushButton:pressed {	\n"
+            "	background-color: rgb(35, 40, 49);\n"
+            "	border: 2px solid rgb(43, 50, 61);\n"
+            "}\n"
+            "QLabel{\n"
+            "color: white;\n"
+            "}\n"
+        )
+        ordenes = table.item(table.currentRow(), 1).text().split("\n")
+        font = QFont()
+        font.setPointSize(10)
+        font.setFamily("Segoe UI")
+        container = QGridLayout(dlg)
+        container.setHorizontalSpacing(10)
+        container.setVerticalSpacing(10)
+        container.setContentsMargins(10, -1, 10, -1)
+        label = QLabel()
+        label.setAlignment(Qt.AlignCenter)
+        label.setText(table.item(table.currentRow(), 1).text())
+        label.setStyleSheet("color: #FFFFFF")
+        # put the label at 0, 0, 0, 0 in the container grid layout
+        container.addWidget(label, 0, 0, alignment=Qt.AlignTop)
+        if self.currentPage == "Cocina":
+            # Align all items inside of container to the center
             # create a button with material design style with "Listo" as Text
             button = QPushButton("Listo")
             button.setMinimumSize(QSize(80, 30))
             button.setMaximumSize(QSize(80, 30))
             button.setFont(font)
-            button.clicked.connect(
-                lambda: self.switchOrderState(dlg, table) and dlg.close()
-            )
+            button.clicked.connect(lambda: self.switchOrderState(dlg, table, "Listo"))
 
             container.addWidget(button, 2, 0, alignment=Qt.AlignCenter)
             dlg.exec()
-            print(widgets.tableWidget.currentRow())
+        elif self.currentPage == "Pedidos":
+            button = QPushButton("Pagado")
+            button.setMinimumSize(QSize(80, 30))
+            button.setMaximumSize(QSize(80, 30))
+            button.setFont(font)
+            button.clicked.connect(lambda: self.switchOrderState(dlg, table, "Pagado"))
+            container.addWidget(button, 2, 0, alignment=Qt.AlignCenter)
+            dlg.exec()
 
-    def switchOrderState(self, parent, table):
+    def switchOrderState(self, parent, table, state):
         """
         Esta función actualiza el estado de un pedido seleccionado a "Listo" y muestra un mensaje de
         error si no se selecciona ningún pedido.
@@ -100,16 +115,16 @@ class MainWindow(QMainWindow):
         :param parent: El parámetro principal es una referencia al widget principal del widget actual.
         Se utiliza para especificar el widget principal del QDialog que se crea en la función
         """
-        if widgets.tableWidget.currentRow() >= 0:
+        if table.currentRow() >= 0:
             self.conn = self.dbConnect()
             mycursor = self.conn.cursor()
             mycursor.execute(
-                f"UPDATE pedidos SET estado = 'Listo' WHERE noOrden = {widgets.tableWidget.item(widgets.tableWidget.currentRow(), 0).text()}"
+                f"UPDATE pedidos SET estado = '{state}' WHERE noOrden = {table.item(table.currentRow(), 0).text()}"
             )
             self.conn.commit()
             self.conn.close()
             self.fillTable(None, table)
-        if widgets.tableWidget.currentRow() < 0:
+        if table.currentRow() < 0:
             dlg = QDialog(parent)
             dlg.setMinimumSize(QSize(250, 140))
             dlg.setWindowTitle("Error")
@@ -121,6 +136,7 @@ class MainWindow(QMainWindow):
             label.setText("No hay un pedido seleccionado.")
             label.move(50, 50)
             label.setAlignment(Qt.AlignCenter)
+        parent.close()
 
     def dbConnect(self):
         """
@@ -198,7 +214,6 @@ class MainWindow(QMainWindow):
             data = mycursor.fetchall()
             mycursor.close()
 
-            print(f"DATA: {data}")
             columns = ["N° Orden", "Orden", "Mesa", "Total"]
             table.setRowCount(1)
             for row in data:
@@ -231,7 +246,6 @@ class MainWindow(QMainWindow):
             )
             data = mycursor.fetchall()
             mycursor.close()
-            print(data)
             columns = ["N° Orden", "Orden", "Mesa", "Fecha", "Hora"]
             table.setRowCount(1)
             for row in data:
@@ -409,8 +423,8 @@ class MainWindow(QMainWindow):
                     item = QTableWidgetItem()
                     widgets.tableWidget.setItem(data.index(row) + 1, currCol, item)
                     item.setText(row[currCol])
-            if not self.tableTimer.isActive():
-                self.fillTable(data, widgets.tableWidget)
+
+            self.fillTable(data, widgets.tableWidget)
 
             if widgets.tableWidget.rowCount() < 16:
                 widgets.tableWidget.setRowCount(16)
@@ -422,7 +436,7 @@ class MainWindow(QMainWindow):
             # RESET ANOTHERS BUTTONS SELECTED
             UIFunctions.resetStyle(self, btnName)
             btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))  # SELECT MENU
-
+            self.pedidosShowTextEdit = widgets.pedidosStringShow
             widgets.pedidoLineEdit.clicked.connect(self.openPedidoWindow)
 
             data = [
@@ -454,12 +468,15 @@ class MainWindow(QMainWindow):
                     item = QTableWidgetItem()
                     widgets.tableWidget2.setItem(data.index(row) + 1, currCol, item)
                     item.setText(row[currCol])
-            if not self.tableTimer2.isActive():
-                self.fillTable(data, widgets.tableWidget2)
-            print(widgets.tableWidget2.rowCount())
+
+            self.fillTable(data, widgets.tableWidget2)
             if widgets.tableWidget2.rowCount() < 16:
                 print(widgets.tableWidget2.rowCount())
                 widgets.tableWidget2.setRowCount(16)
+
+            widgets.enviarPedidoButton.clicked.connect(
+                lambda: self.enviarPedidoToDB(widgets.mesaLineEdit, self.pedidoString)
+            )
 
         if btnName == "btn_save":
             self.currentPage = "Save"
@@ -471,21 +488,53 @@ class MainWindow(QMainWindow):
     # RESIZE EVENTS
     # ///////////////////////////////////////////////////////////////
 
+    def enviarPedidoToDB(self, mesaLE, pedidos):
+        mesa = mesaLE.text()
+        # current dateTime
+        now = datetime.now()
+        # convert to string
+        fecha = now.strftime("%d/%m/%Y")
+        # %H:%M:%S
+        hora = now.strftime("%H:%M:%S")
+
+        fechayhora = self.date_time_str.split(" ")
+        # print(f"fechayhora:{fechayhora}")
+        print(f"fecha:{fecha}")
+        print(f"hora:{hora}")
+        string = f"INSERT INTO pedidos (orden, mesa, fecha, hora, estado, total) VALUES ('{pedidos}', '{mesa}', '{fecha}', '{hora}', 'Preparando', '{self.total}')"
+        self.conn = self.dbConnect()
+        mycursor = self.conn.cursor()
+        mycursor.execute(string)
+        if self.conn.commit():
+            dlg = QDialog(self)
+            dlg.setMinimumSize(QSize(250, 140))
+            dlg.setWindowTitle("Pedido enviado")
+            font = QFont()
+            font.setPointSize(10)
+            font.setFamily("Segoe UI")
+            label = QLabel(dlg)
+            label.setFont(font)
+            label.setText("El pedido ha sido enviado")
+            label.move(50, 50)
+            label.setAlignment(Qt.AlignCenter, Qt.AlignCenter)
+            dlg.exec_()
+
+        self.conn.close()
+
     def getMenu(self):
         self.conn = self.dbConnect()
         mycursor = self.conn.cursor()
         mycursor.execute("SELECT nombreComida, precioComida FROM menu")
         data = mycursor.fetchall()
-        print(data)
+
         menu = {}
         for a, b in data:
             menu.setdefault(a, []).append(str(b))
-        print(menu)
+
         return menu
 
     def actualizarTotal(self, tw, tl):
         try:
-            print(tl.text().split("$")[1])
             total = float(tl.text().split("$")[1])
             for i in range(tw.rowCount()):
                 if i >= self.numPlato:
@@ -493,8 +542,6 @@ class MainWindow(QMainWindow):
                         not type(tw.item(i, 2)) == None
                         and not type(tw.item(i, 3)) == None
                     ):
-                        print(tw.item(i, 2).text())
-                        print(tw.item(i, 3).text())
                         total += float(tw.item(i, 3).text()) * float(
                             tw.item(i, 2).text()
                         )
@@ -536,7 +583,6 @@ class MainWindow(QMainWindow):
         # dlg.setWindowTitle(
         #    f"Orden {table.item(table.currentRow(), 0).text()} // Mesa {table.item(table.currentRow(), 2).text()}"
         # )
-
         dlg.setWindowTitle("Food Chooser")
         dlg.setStyleSheet(
             'QDialog{background-color: rgb(40, 44, 52);border: 1px solid rgb(44, 49, 58);color: rgb(221, 221, 221);font: 10pt "Segoe UI";}  \n'
@@ -882,7 +928,7 @@ class MainWindow(QMainWindow):
         terminarPushButton.setText("Terminar")
         pedidos = []
         terminarPushButton.clicked.connect(
-            lambda: self.terminarPedido(self.pedidoString, totalLabel)
+            lambda: self.terminarPedido(dlg, self.pedidoString, totalLabel)
         )
         container.addWidget(terminarPushButton, 4, 3, 1, 4, alignment=Qt.AlignCenter)
         invisibleInput = QLineEdit()
@@ -906,11 +952,19 @@ class MainWindow(QMainWindow):
         )
         dlg.exec()
 
-    def terminarPedido(self, pS, tL):
+    def terminarPedido(self, parent, pS, tL):
         self.pedidos.append(pS)
         self.pedidos.append(float(tL.text().split("$")[1]))
         print("*** PEDIDO TERMINADO ***")
         print(self.pedidos)
+        self.pedidosShowTextEdit.setPlainText(pS)
+        # current dateTime
+        now = datetime.now()
+        # convert to string
+        self.date_time_str = now.strftime("%D/%m/%Y %H:%M:%S")
+        print("DateTime String:", self.date_time_str)
+        self.total = float(tL.text().split("$")[1])
+        parent.close()
 
     def resizeEvent(self, event):
         # Update Size Grips
@@ -920,7 +974,7 @@ class MainWindow(QMainWindow):
     # ///////////////////////////////////////////////////////////////
     def mousePressEvent(self, event):
         # SET DRAG POS WINDOW
-        self.dragPos = event.globalPos()
+        self.dragPos = event.globalPos().toPoint()
 
         # PRINT MOUSE EVENTS
         if event.buttons() == Qt.LeftButton:

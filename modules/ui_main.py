@@ -1169,13 +1169,13 @@ class Ui_MainWindow(object):
         self.new_page = QWidget()
         self.new_page.setObjectName("new_page")
         self.meseroGridLayout = QGridLayout(self.new_page)
-
+        self.meseroGridLayout.setVerticalSpacing(20)
         self.mesaLabel = QLabel(self.new_page)
         self.mesaLabel.setObjectName("mesaLabel")
         self.mesaLabel.setAlignment(Qt.AlignLeft)
         self.mesaLabel.setFixedWidth(50)
         self.mesaLabel.setFixedHeight(20)
-        self.meseroGridLayout.addWidget(self.mesaLabel, 0, 0, 1, 1, Qt.AlignRight)
+        self.meseroGridLayout.addWidget(self.mesaLabel, 0, 0, 1, 1, Qt.AlignLeft)
 
         self.mesaLineEdit = QLineEdit(self.new_page)
         self.mesaLineEdit.setObjectName("mesaNumeroMesero")
@@ -1190,13 +1190,28 @@ class Ui_MainWindow(object):
         self.pedidoLabel.setAlignment(Qt.AlignLeft)
         self.pedidoLabel.setFixedWidth(50)
         self.pedidoLabel.setFixedHeight(20)
-        self.meseroGridLayout.addWidget(self.pedidoLabel, 1, 0, 1, 1, Qt.AlignRight)
+        self.meseroGridLayout.addWidget(self.pedidoLabel, 1, 0, 1, 1, Qt.AlignLeft)
 
         self.pedidoLineEdit = QPushButton(self.new_page)
         self.pedidoLineEdit.setObjectName("pedidoMeseroButton")
         self.pedidoLineEdit.setMinimumSize(QSize(50, 50))
         self.pedidoLineEdit.setMaximumSize(QSize(250, 100))
         self.pedidoLineEdit.setStyleSheet("padding-left: 5px;\npadding-right: 5px;\n")
+
+        self.meseroGridLayout.addWidget(self.pedidoLineEdit, 1, 1, 1, 1, Qt.AlignLeft)
+
+        self.pedidosStringShow = QPlainTextEdit(self.new_page)
+        self.pedidosStringShow.setObjectName("pedidosStringShow")
+        self.pedidosStringShow.setReadOnly(True)
+        self.pedidosStringShow.setPlaceholderText("... x1\n... x1")
+        self.pedidosStringShow.setMinimumSize(QSize(50, 50))
+        self.pedidosStringShow.setMaximumSize(QSize(250, 100))
+        self.pedidosStringShow.setStyleSheet("text-align: center;\n")
+
+        self.meseroGridLayout.addWidget(
+            self.pedidosStringShow, 2, 0, 1, 2, Qt.AlignLeft
+        )
+
         """
         self.pedidoLineEdit.setStyleSheet(
             "	background-color: rgb(33, 37, 43);\n"
@@ -1208,7 +1223,6 @@ class Ui_MainWindow(object):
         )
         
         """
-        self.meseroGridLayout.addWidget(self.pedidoLineEdit, 1, 1, 1, 1, Qt.AlignLeft)
 
         self.enviarPedidoButton = QPushButton(self.new_page)
         self.enviarPedidoButton.setObjectName("enviarPedidoButton")
@@ -1217,7 +1231,7 @@ class Ui_MainWindow(object):
 
         self.enviarPedidoButton.setFixedSize(QSize(150, 35))
         self.meseroGridLayout.addWidget(
-            self.enviarPedidoButton, 2, 0, 1, 2, Qt.AlignCenter
+            self.enviarPedidoButton, 3, 0, 1, 2, Qt.AlignCenter
         )
 
         """
