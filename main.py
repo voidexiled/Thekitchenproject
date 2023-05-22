@@ -1,11 +1,17 @@
 import sys
 import os
 import platform
-import mysql.connector
+
+# import mysql.connector
+import pypyodbc as odbc
+from modules.tableThread import UpdateThread
+from modules.table2Thread import UpdateThread2
+
 import time
 from datetime import datetime
 from decimal import Decimal
-from mysql.connector.plugins import caching_sha2_password
+
+# from mysql.connector.plugins import caching_sha2_password
 
 # IMPORT / GUI AND MODULES AND WIDGETS
 # ///////////////////////////////////////////////////////////////
@@ -159,112 +165,36 @@ class MainWindow(QMainWindow):
                     database="thekitchenproject",
                 )
             if self.mode == "School":
-                self.conn = mysql.connector.connect(
-                    host="us-cdbr-east-06.cleardb.net",
-                    password="d4d6ad06",
-                    user="b9744502d4cb76",
-                    database="heroku_b71305dcc13c949",
-                )
+                try:
+                    connString = "Driver={ODBC Driver 18 for SQL Server};Server=tcp:thekitchenproject.database.windows.net,1433;Database=thekitchenproject;Uid=wwytk2mu;Pwd=Z4me5cwh*;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+                    self.conn = odbc.connect(connString)
+                except odbc.Error as err:
+                    print(err)
 
-            if self.conn.is_connected():
+                # except mysql.connector.Error as err:
+                #    widgets.creditsLabel.setText(err.msg)
+
+            if self.is_connection_active(self.conn):
                 mycursor = self.conn.cursor()
             else:
                 # widgets.plainTextEdit.setText(
                 # str())
                 print("Failed to connect")
             return self.conn
-        except Exception as ex:
+        except odbc.Error as ex:
             print("////////")
-            print(ex.args[0])
+            print(ex)
             print("////////")
 
-    def rememberSelected(self, data, table):
-        """
-        Esta función recuerda la fila seleccionada en un widget de tabla y llena la tabla con datos.
-
-        :param data: Es una variable que contiene los datos que se utilizarán para llenar el widget de
-        la tabla. Se llama a la función "fillTable" con estos datos para llenar la tabla
-        """
-        sel = table.currentRow()
-        self.selected = sel
-        self.fillTable(data, table)
-
-    def fillTable(self, data, table):
-        """
-        La función "fillTable" toma un parámetro "datos" y realiza alguna acción sobre él, pero la
-        acción específica no se muestra en el fragmento de código proporcionado.
-
-        :param data: El parámetro "datos" es probablemente una variable que contiene información que
-        debe mostrarse en formato de tabla. La función "fillTable" es probablemente un método que toma
-        estos datos y llena una tabla con ellos, ya sea creando nuevas filas en la tabla o actualizando
-        las existentes.
-        """
-        print(self.currentPage)
-        if self.currentPage == "Pedidos":
-            self.conn = self.dbConnect()
-            mycursor = self.conn.cursor()
-            mycursor.execute(
-                "SELECT noOrden, orden, mesa, total FROM pedidos WHERE estado = 'Listo'"
-            )
-            data = mycursor.fetchall()
-            mycursor.close()
-
-            columns = ["N° Orden", "Orden", "Mesa", "Total"]
-            table.setRowCount(1)
-            for row in data:
-                rowcount = table.rowCount()
-                table.insertRow(rowcount)
-                for col in columns:
-                    currCol = columns.index(col)
-                    item = QTableWidgetItem()
-                    table.setItem(data.index(row) + 1, currCol, item)
-                    item.setText(str(row[currCol]))
-                if table.rowCount() < 16:
-                    table.setRowCount(16)
-                    table.selectRow(self.selected)
-                    self.conn.close()
-                    if self.tableTimer2.isActive():
-                        self.tableTimer2.stop()
-                    if not self.tableTimer2.isActive():
-                        self.tableTimer2 = QTimer()
-                        self.tableTimer2.setInterval(1200)
-                        self.tableTimer2.timeout.connect(
-                            lambda: self.rememberSelected(data, table)
-                        )
-                        self.tableTimer.start()
-
-        elif self.currentPage == "Cocina":
-            self.conn = self.dbConnect()
-            mycursor = self.conn.cursor()
-            mycursor.execute(
-                "SELECT noOrden, orden, mesa, fecha, hora FROM pedidos where estado = 'Preparando'"
-            )
-            data = mycursor.fetchall()
-            mycursor.close()
-            columns = ["N° Orden", "Orden", "Mesa", "Fecha", "Hora"]
-            table.setRowCount(1)
-            for row in data:
-                rowcount = table.rowCount()
-                table.insertRow(rowcount)
-                for col in columns:
-                    currCol = columns.index(col)
-                    item = QTableWidgetItem()
-                    table.setItem(data.index(row) + 1, currCol, item)
-                    item.setText(str(row[currCol]))
-
-            if table.rowCount() < 16:
-                table.setRowCount(16)
-            table.selectRow(self.selected)
-            self.conn.close()
-            if self.tableTimer.isActive():
-                self.tableTimer.stop()
-            if not self.tableTimer.isActive():
-                self.tableTimer = QTimer()
-                self.tableTimer.setInterval(1200)
-                self.tableTimer.timeout.connect(
-                    lambda: self.rememberSelected(data, table)
-                )
-                self.tableTimer.start()
+    def is_connection_active(self, connection):
+        try:
+            # Realiza una operación de prueba en la base de datos
+            cursor = connection.cursor()
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+            return True
+        except pyodbc.Error:
+            return False
 
     def __init__(self):
         QMainWindow.__init__(self)
@@ -360,6 +290,7 @@ class MainWindow(QMainWindow):
         widgets.btn_home.setStyleSheet(
             UIFunctions.selectMenu(widgets.btn_home.styleSheet())
         )
+        self.updateThread = UpdateThread()
 
     # BUTTONS CLICK
 
@@ -385,6 +316,23 @@ class MainWindow(QMainWindow):
         # widgets.tableWidget.clicked.connect(lambda: self.rememberselected())
 
         if btnName == "btn_widgets":
+            try:
+                if self.timer:
+                    if self.timer.isActive():
+                        self.timer.stop()
+                if self.timer2:
+                    if self.timer2.isActive():
+                        self.timer2.stop()
+                if self.updateThread:
+                    if self.updateThread.isRunning():
+                        self.updateThread.terminate()
+                        self.updateThread.wait()
+                if self.updateThread2:
+                    if self.updateThread2.isRunning():
+                        self.updateThread2.terminate()
+                        self.updateThread2.wait()
+            except Exception as ex:
+                print(ex)
             self.currentPage = "Cocina"
             widgets.stackedWidget.setCurrentWidget(widgets.widgets)
             UIFunctions.resetStyle(self, btnName)
@@ -407,25 +355,40 @@ class MainWindow(QMainWindow):
             widgets.tableWidget.item(0, 2).setFont(font)
             widgets.tableWidget.item(0, 3).setFont(font)
             widgets.tableWidget.item(0, 4).setFont(font)
-            # FILL TABLE DATA
+            widgets.tableWidget.verticalHeader().setStretchLastSection(False)
+            widgets.tableWidget.horizontalHeader().setStretchLastSection(False)
+            # Crear el objeto QThread para realizar la actualización en segundo plano
+            self.updateThread = UpdateThread()
+            self.updateThread.dataUpdated.connect(self.actualizar_tabla1_en_hilo)
+            self.updateThread.start()
 
-            # ROWS
-            for row in data:
-                rowcount = widgets.tableWidget.rowCount()
-                widgets.tableWidget.insertRow(rowcount)
-                for col in columns:
-                    currCol = columns.index(col)
-                    item = QTableWidgetItem()
-                    widgets.tableWidget.setItem(data.index(row) + 1, currCol, item)
-                    item.setText(row[currCol])
+            # Crear un QTimer para actualizar la tabla periódicamente
 
-            self.fillTable(data, widgets.tableWidget)
-
-            if widgets.tableWidget.rowCount() < 16:
-                widgets.tableWidget.setRowCount(16)
+            self.timer = QTimer()
+            self.timer.timeout.connect(self.actualizar_tabla1)
+            self.timer.start(
+                1200
+            )  # Actualizar cada 2 segundos (ajusta el intervalo según tus necesidades)
 
         # SHOW NEW PAGE
         if btnName == "btn_new":
+            try:
+                if self.timer:
+                    if self.timer.isActive():
+                        self.timer.stop()
+                if self.timer2:
+                    if self.timer2.isActive():
+                        self.timer2.stop()
+                if self.updateThread:
+                    if self.updateThread.isRunning():
+                        self.updateThread.terminate()
+                        self.updateThread.wait()
+                if self.updateThread2:
+                    if self.updateThread2.isRunning():
+                        self.updateThread2.terminate()
+                        self.updateThread2.wait()
+            except Exception as ex:
+                print(ex)
             self.currentPage = "Pedidos"
             widgets.stackedWidget.setCurrentWidget(widgets.new_page)  # SET PAGE
             # RESET ANOTHERS BUTTONS SELECTED
@@ -453,21 +416,17 @@ class MainWindow(QMainWindow):
             widgets.tableWidget2.item(0, 1).setFont(font)
             widgets.tableWidget2.item(0, 2).setFont(font)
             widgets.tableWidget2.item(0, 3).setFont(font)
+            widgets.tableWidget2.verticalHeader().setStretchLastSection(False)
+            widgets.tableWidget2.horizontalHeader().setStretchLastSection(False)
+            # Crear el objeto QThread para realizar la actualización en segundo plano
+            self.updateThread2 = UpdateThread2()
+            self.updateThread2.dataUpdated.connect(self.actualizar_tabla2_en_hilo)
+            self.updateThread2.start()
+            # Crear un QTimer para actualizar la tabla periódicamente
 
-            # ROWS
-            for row in data:
-                rowcount = widgets.tableWidget2.rowCount()
-                widgets.tableWidget2.insertRow(rowcount)
-                for col in columns:
-                    currCol = columns.index(col)
-                    item = QTableWidgetItem()
-                    widgets.tableWidget2.setItem(data.index(row) + 1, currCol, item)
-                    item.setText(row[currCol])
-
-            self.fillTable(data, widgets.tableWidget2)
-            if widgets.tableWidget2.rowCount() < 16:
-                print(widgets.tableWidget2.rowCount())
-                widgets.tableWidget2.setRowCount(16)
+            self.timer2 = QTimer()
+            self.timer2.timeout.connect(self.actualizar_tabla2)
+            self.timer2.start(1200)  # Actualizar cada 2 segundos
 
             widgets.enviarPedidoButton.clicked.connect(
                 lambda: self.enviarPedidoToDB(widgets.mesaLineEdit, self.pedidoString)
@@ -482,6 +441,40 @@ class MainWindow(QMainWindow):
 
     # RESIZE EVENTS
     # ///////////////////////////////////////////////////////////////
+
+    def actualizar_tabla1(self):
+        # Iniciar la actualización en un hilo separado
+        self.updateThread.start()
+
+    def actualizar_tabla1_en_hilo(self, data):
+        # Borrar los elementos existentes en la tabla
+        # widgets.tableWidget.clearContents()
+        if widgets.tableWidget.rowCount() != len(data) + 1:
+            widgets.tableWidget.setRowCount(len(data) + 1)
+        # Obtener los datos y actualizar la tabla
+        for i, row_data in enumerate(data):
+            for j, value in enumerate(row_data):
+                item = QTableWidgetItem(str(value))
+                widgets.tableWidget.setItem(i + 1, j, item)
+
+    def actualizar_tabla2(self):
+        # Iniciar la actualización en un hilo separado
+        self.updateThread2.start()
+
+    def actualizar_tabla2_en_hilo(self, data):
+        # Borrar los elementos existentes en la tabla
+        # widgets.tableWidget.clearContents()
+
+        # Obtener los datos y actualizar la tabla
+        if widgets.tableWidget2.rowCount() != len(data) + 1:
+            widgets.tableWidget2.setRowCount(len(data) + 1)
+        for i, row_data in enumerate(data):
+            for j, value in enumerate(row_data):
+                try:
+                    item = QTableWidgetItem(str(value))
+                    widgets.tableWidget2.setItem(i + 1, j, item)
+                except Exception as ex:
+                    print(ex)
 
     def enviarPedidoToDB(self, mesaLE, pedidos):
         mesa = mesaLE.text()
@@ -513,7 +506,7 @@ class MainWindow(QMainWindow):
             label.move(50, 50)
             label.setAlignment(Qt.AlignCenter, Qt.AlignCenter)
             dlg.exec()
-
+        mycursor.close()
         self.conn.close()
 
     def getMenu(self):
@@ -617,46 +610,46 @@ class MainWindow(QMainWindow):
             "	border: 2px solid rgb(91, 101, 124);\n"
             "}\n"
             """
-    QComboBox {
-        background-color: #212121;
-        color: #fff;
-        padding: 8px 16px;
-        font-size: 14px;
-        border: none;
-        border-radius: 4px;
-        
-        font-family: 'Segoe UI';
-    }
-    
-    QComboBox::drop-down {
-        width: 20px;
-        height: 20px;
-        border-radius: 10px;
-        border: none;
-        
-        subcontrol-origin: padding;
-        subcontrol-position: top right;
-        margin-top: 8px;
-        margin-right: 5px;
-    }
-    
-    QComboBox::down-arrow {
-        border: none;
-        width: 10px;
-        height: 10px;
-        image: url(images/icons/cil-arrow-bottom.png);  /* Ruta de la imagen de la flecha hacia abajo */
-    }
-    
-    QComboBox::down-arrow:on {
-        transform: rotate(180deg);
-    }
-    
-    QComboBox QAbstractItemView {
-        border: none;
-        background-color: #212121;
-        color: #fff;
-    }
-"""
+            QComboBox {
+                background-color: #212121;
+                color: #fff;
+                padding: 8px 16px;
+                font-size: 14px;
+                border: none;
+                border-radius: 4px;
+                
+                font-family: 'Segoe UI';
+            }
+            
+            QComboBox::drop-down {
+                width: 20px;
+                height: 20px;
+                border-radius: 10px;
+                border: none;
+                
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                margin-top: 8px;
+                margin-right: 5px;
+            }
+            
+            QComboBox::down-arrow {
+                border: none;
+                width: 10px;
+                height: 10px;
+                image: url(images/icons/cil-arrow-bottom.png);  /* Ruta de la imagen de la flecha hacia abajo */
+            }
+            
+            QComboBox::down-arrow:on {
+                transform: rotate(180deg);
+            }
+            
+            QComboBox QAbstractItemView {
+                border: none;
+                background-color: #212121;
+                color: #fff;
+            }
+            """
             "QTableWidget {	\n"
             "	background-color: transparent;\n"
             "	padding: 10px;\n"
@@ -932,13 +925,13 @@ class MainWindow(QMainWindow):
         container.addWidget(invisibleInput, 5, 0, 6, 1, alignment=Qt.AlignCenter)
 
         """
-        button = QPushButton("Listo")
-        button.setMinimumSize(QSize(80, 30))
-        button.setMaximumSize(QSize(80, 30))
-        button.setFont(font)
-        button.clicked.connect(lambda: self.switchOrderState(dlg, table))
+            button = QPushButton("Listo")
+            button.setMinimumSize(QSize(80, 30))
+            button.setMaximumSize(QSize(80, 30))
+            button.setFont(font)
+            button.clicked.connect(lambda: self.switchOrderState(dlg, table))
 
-        container.addWidget(button, 2, 0, alignment=Qt.AlignCenter)
+            container.addWidget(button, 2, 0, alignment=Qt.AlignCenter)
         """
         agregarPushButton.clicked.connect(
             lambda: self.agregarPedido(
