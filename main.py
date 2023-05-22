@@ -2,7 +2,6 @@ import sys
 import os
 import platform
 
-# import mysql.connector
 import pypyodbc as odbc
 from modules.tableThread import UpdateThread
 from modules.table2Thread import UpdateThread2
@@ -11,24 +10,16 @@ import time
 from datetime import datetime
 from decimal import Decimal
 
-# from mysql.connector.plugins import caching_sha2_password
-
-# IMPORT / GUI AND MODULES AND WIDGETS
-# ///////////////////////////////////////////////////////////////
 from modules import *
 from widgets import *
 
 # FIX Problem for High DPI and Scale above 100%
 os.environ["QT_FONT_DPI"] = "96"
 
-# SET GLOBAL WIDGETS
-# ///////////////////////////////////////////////////////////////
 widgets = None
 
 
 class MainWindow(QMainWindow):
-    tableTimer = QTimer()
-    tableTimer2 = QTimer()
     currentPage = "Home"
     conn = None
     mode = "School"
@@ -44,10 +35,6 @@ class MainWindow(QMainWindow):
         QtCore.QCoreApplication.instance().quit()
 
     def onSelectRow(self, table):
-        """
-        Esta función crea un cuadro de diálogo con información sobre una fila seleccionada en una tabla
-        y un botón para cambiar el estado del pedido.
-        """
         if not table.currentRow() > 0:
             return
 
@@ -114,13 +101,6 @@ class MainWindow(QMainWindow):
             dlg.exec()
 
     def switchOrderState(self, parent, table, state):
-        """
-        Esta función actualiza el estado de un pedido seleccionado a "Listo" y muestra un mensaje de
-        error si no se selecciona ningún pedido.
-
-        :param parent: El parámetro principal es una referencia al widget principal del widget actual.
-        Se utiliza para especificar el widget principal del QDialog que se crea en la función
-        """
         if table.currentRow() >= 0:
             self.conn = self.dbConnect()
             mycursor = self.conn.cursor()
@@ -129,7 +109,6 @@ class MainWindow(QMainWindow):
             )
             self.conn.commit()
             self.conn.close()
-            self.fillTable(None, table)
         if table.currentRow() < 0:
             dlg = QDialog(parent)
             dlg.setMinimumSize(QSize(250, 140))
@@ -145,34 +124,9 @@ class MainWindow(QMainWindow):
         parent.close()
 
     def dbConnect(self):
-        """
-        Esta función se conecta a una base de datos MySQL según el modo especificado (ya sea "Hogar" o
-        "Escuela").
-        :return: el objeto de conexión a la base de datos `self.conn`.
-        """
         try:
-            if self.mode == "Home":
-                self.conn = mysql.connector.connect(
-                    host="localhost",
-                    password="EURO20partners.",
-                    user="root",
-                    database="thekitchenproject",
-                )
-                mysql.connector.plugins.caching_sha2_password.MySQLCachingSHA2PasswordAuthPlugin(
-                    auth_data="",
-                    username="root",
-                    password="EURO20partners.",
-                    database="thekitchenproject",
-                )
-            if self.mode == "School":
-                try:
-                    connString = "Driver={ODBC Driver 18 for SQL Server};Server=tcp:thekitchenproject.database.windows.net,1433;Database=thekitchenproject;Uid=wwytk2mu;Pwd=Z4me5cwh*;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
-                    self.conn = odbc.connect(connString)
-                except odbc.Error as err:
-                    print(err)
-
-                # except mysql.connector.Error as err:
-                #    widgets.creditsLabel.setText(err.msg)
+            connString = "Driver={ODBC Driver 18 for SQL Server};Server=tcp:thekitchenproject.database.windows.net,1433;Database=thekitchenproject;Uid=wwytk2mu;Pwd=Z4me5cwh*;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+            self.conn = odbc.connect(connString)
 
             if self.is_connection_active(self.conn):
                 mycursor = self.conn.cursor()
@@ -180,10 +134,12 @@ class MainWindow(QMainWindow):
                 # widgets.plainTextEdit.setText(
                 # str())
                 print("Failed to connect")
+                return
             return self.conn
         except odbc.Error as ex:
             print("////////")
             print(ex)
+            widgets.creditsLabel.setText(err.msg)
             print("////////")
 
     def is_connection_active(self, connection):
@@ -291,6 +247,10 @@ class MainWindow(QMainWindow):
             UIFunctions.selectMenu(widgets.btn_home.styleSheet())
         )
         self.updateThread = UpdateThread()
+        widgets.pedidoLineEdit.clicked.connect(self.openPedidoWindow)
+        widgets.enviarPedidoButton.clicked.connect(
+            lambda: self.enviarPedidoToDB(widgets.mesaLineEdit, self.pedidoString)
+        )
 
     # BUTTONS CLICK
 
@@ -304,6 +264,11 @@ class MainWindow(QMainWindow):
         # GET BUTTON CLICKED
         btn = self.sender()
         btnName = btn.objectName()
+        font = QFont()
+        font.setFamily("Segoe UI")
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setItalic(False)
 
         # SHOW HOME PAGE
         if btnName == "btn_home":
@@ -337,24 +302,14 @@ class MainWindow(QMainWindow):
             widgets.stackedWidget.setCurrentWidget(widgets.widgets)
             UIFunctions.resetStyle(self, btnName)
             btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
-            data = [
-                ["1", "Orden1", "Mesa1", "04/03/2023", "00:08"],
-                ["2", "Orden2", "Mesa2", "04/03/2023", "00:08"],
-                ["3", "Orden3", "Mesa3", "04/03/2023", "00:08"],
-                ["4", "Orden4", "Mesa4", "04/03/2023", "00:08"],
-            ]
+
             columns = ["N° Orden", "Orden", "Mesa", "Fecha", "Hora"]
-            font = QFont()
-            font.setFamily("Segoe UI")
-            font.setPointSize(12)
-            font.setBold(True)
-            font.setItalic(False)
+
             widgets.tableWidget.setRowCount(1)
-            widgets.tableWidget.item(0, 0).setFont(font)
-            widgets.tableWidget.item(0, 1).setFont(font)
-            widgets.tableWidget.item(0, 2).setFont(font)
-            widgets.tableWidget.item(0, 3).setFont(font)
-            widgets.tableWidget.item(0, 4).setFont(font)
+
+            for i in range(len(columns)):
+                widgets.tableWidget.item(0, i).setFont(font)
+
             widgets.tableWidget.verticalHeader().setStretchLastSection(False)
             widgets.tableWidget.horizontalHeader().setStretchLastSection(False)
             # Crear el objeto QThread para realizar la actualización en segundo plano
@@ -395,27 +350,14 @@ class MainWindow(QMainWindow):
             UIFunctions.resetStyle(self, btnName)
             btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))  # SELECT MENU
             self.pedidosShowTextEdit = widgets.pedidosStringShow
-            widgets.pedidoLineEdit.clicked.connect(self.openPedidoWindow)
 
-            data = [
-                ["1", "Orden1", "Mesa1", "00.00"],
-                ["2", "Orden2", "Mesa2", "00.00"],
-                ["3", "Orden3", "Mesa3", "00.00"],
-                ["4", "Orden4", "Mesa4", "00.00"],
-            ]
             columns = ["N° Orden", "Orden", "Mesa", "Total"]
-            font = QFont()
-            font.setFamily("Segoe UI")
-            font.setPointSize(12)
-            font.setBold(True)
-            font.setItalic(False)
 
             widgets.tableWidget2.setRowCount(1)
             widgets.tableWidget2.item(0, 0).setText("N° Orden")
-            widgets.tableWidget2.item(0, 0).setFont(font)
-            widgets.tableWidget2.item(0, 1).setFont(font)
-            widgets.tableWidget2.item(0, 2).setFont(font)
-            widgets.tableWidget2.item(0, 3).setFont(font)
+            for i in range(len(columns)):
+                widgets.tableWidget.item(0, i).setFont(font)
+
             widgets.tableWidget2.verticalHeader().setStretchLastSection(False)
             widgets.tableWidget2.horizontalHeader().setStretchLastSection(False)
             # Crear el objeto QThread para realizar la actualización en segundo plano
@@ -427,10 +369,6 @@ class MainWindow(QMainWindow):
             self.timer2 = QTimer()
             self.timer2.timeout.connect(self.actualizar_tabla2)
             self.timer2.start(1200)  # Actualizar cada 2 segundos
-
-            widgets.enviarPedidoButton.clicked.connect(
-                lambda: self.enviarPedidoToDB(widgets.mesaLineEdit, self.pedidoString)
-            )
 
         if btnName == "btn_save":
             self.currentPage = "Save"
@@ -484,19 +422,21 @@ class MainWindow(QMainWindow):
         fecha = now.strftime("%d/%m/%Y")
         # %H:%M:%S
         hora = now.strftime("%H:%M:%S")
-
-        fechayhora = self.date_time_str.split(" ")
-        # print(f"fechayhora:{fechayhora}")
-        print(f"fecha:{fecha}")
-        print(f"hora:{hora}")
-        string = f"INSERT INTO pedidos (orden, mesa, fecha, hora, estado, total) VALUES ('{pedidos}', '{mesa}', '{fecha}', '{hora}', 'Preparando', '{self.total}')"
-        self.conn = self.dbConnect()
-        mycursor = self.conn.cursor()
-        mycursor.execute(string)
-        if self.conn.commit():
-            dlg = QDialog(self)
-            dlg.setMinimumSize(QSize(250, 140))
+        try:
+            string = f"INSERT INTO pedidos (orden, mesa, fecha, hora, estado, total) VALUES ('{pedidos}', '{mesa}', '{fecha}', '{hora}', 'Preparando', '{self.total}')"
+            self.conn = self.dbConnect()
+            mycursor = self.conn.cursor()
+            mycursor.execute(string)
+            mycursor.commit()
+        except odbc.Error as err:
+            print(err.msg)
+        finally:
+            dlg = QDialog()
+            dlg.setMinimumSize(QSize(230, 80))
             dlg.setWindowTitle("Pedido enviado")
+            dlg.setStyleSheet(
+                'QDialog{background-color: rgb(40, 44, 52);border: 1px solid rgb(44, 49, 58);color: rgb(221, 221, 221);font: 10pt "Segoe UI";}  \n'
+            )
             font = QFont()
             font.setPointSize(10)
             font.setFamily("Segoe UI")
@@ -504,10 +444,12 @@ class MainWindow(QMainWindow):
             label.setFont(font)
             label.setText("El pedido ha sido enviado")
             label.move(50, 50)
-            label.setAlignment(Qt.AlignCenter, Qt.AlignCenter)
+            label.setStyleSheet("color: rgb(221,221,221);")
+            label.setAlignment(Qt.AlignCenter)
             dlg.exec()
-        mycursor.close()
-        self.conn.close()
+            dlg.show()
+            mycursor.close()
+            self.conn.close()
 
     def getMenu(self):
         self.conn = self.dbConnect()
